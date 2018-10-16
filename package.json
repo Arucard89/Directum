@@ -1,0 +1,22 @@
+{
+  "name": "directum-viewer-service",
+  "version": "1.0.0",
+  "description": "Сервис для просмотра и закрытия задач для пользователей, не подключенных к системе Directum",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "winax": "^1.0.14"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "directum",
+    "viewer",
+    "job",
+    "ISBL"
+  ],
+  "author": "Revenkov Kirill",
+  "license": "UNLICENSED"
+}
