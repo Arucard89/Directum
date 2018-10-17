@@ -1,5 +1,7 @@
 const moment = require('moment');
 
+moment.locale('ru');
+
 class DirectumServices {
 
     constructor(systemcode = 'DIRECTUM'){
@@ -25,7 +27,9 @@ class DirectumServices {
             JobID : JobInfo.ID,
             TaskID : JobInfo.TaskID,
             JobText : CurrentJobText,
+            FullText : job.GetFullText(true),
         };
         return result;
     }
  }
+module.exports = DirectumServices;

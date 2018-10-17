@@ -1,0 +1,53 @@
+html
+    head
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="/css/bootstrap.min.css" rel="stylesheet")
+        link(href="/css/main.css" rel="stylesheet")
+        title= `Задание ${jobInfo.JobID}`
+    body
+        div.container
+            //div.container#jumbotron
+                div.jumbotron
+                    //div.media
+                        div.media-left
+                            img(src='/img/logo-directum.png' margin='auto')
+                        div.media-body
+                    h1 DIRECTUM Viewer
+                    p Данная система позволяет закрывать задания, поставленные Вам, не устанавливая СЭД DIRECTUM
+            h3.text-center= `Задание ИД: ${jobInfo.JobID}`
+            //форма задания
+            -jobInfo = jobInfo ? jobInfo : {};
+            form(action='/performJob')
+                div.container#jobCard
+                    div.row
+                        div.col-xs-2
+                            div.well-sm Тема:
+                        div.col-xs-10
+                            div.well.well-sm#subject= jobInfo.Subject
+                    div.row
+                        div.col-xs-2
+                            div.well-sm Инициатор:
+                        div.col-xs-10
+                            div.well.well-sm#author= jobInfo.Author
+                    div.row
+                        div.col-xs-2
+                            div.well-sm Исполнитель:
+                        div.col-xs-6
+                            div.well.well-sm#performer= jobInfo.Performer
+                        div.col-xs-1
+                            div.well-sm Срок:
+                        div.col-xs-3
+                            div.well.well-sm#final-date= jobInfo.JobFinalDate
+                    div.row
+                        div.col-xs-12
+                            div.well.well-sm#task-text(style="white-space: pre-line")= jobInfo.FullText
+                    div
+                        textarea.form-control#activeText(rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
+                    div.col-xs-offset-10
+                        button.btn.btn-lg.btn-success#performJob Выполнить
+
+
+        //подключаем необходимые скрипты
+        script(src="/js/jquery.min.js")
+        script(src="/js/bootstrap.min.js")
