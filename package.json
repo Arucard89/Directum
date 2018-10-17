@@ -4,7 +4,10 @@
   "description": "Сервис для просмотра и закрытия задач для пользователей, не подключенных к системе Directum",
   "main": "app.js",
   "dependencies": {
+    "bootstrap": "^3.3.7",
     "express": "^4.16.4",
+    "jquery": "^3.3.1",
+    "moment": "^2.22.2",
     "winax": "^1.0.14"
   },
   "devDependencies": {},

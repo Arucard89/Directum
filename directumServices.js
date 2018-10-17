@@ -1,4 +1,7 @@
- class DirectumServices {
+const moment = require('moment');
+
+class DirectumServices {
+
     constructor(systemcode = 'DIRECTUM'){
         this.directum = new (require('./directum'))(systemcode);
     }
@@ -7,6 +10,9 @@
         let result;
         let job = this.directum.Jobs.GetObjectByID(id);
         let JobInfo = job.Info;
+        let JobText = job.DetailDataSet(5);
+        let locate = JobText.Locate('JobID',id);
+        let CurrentJobText = JobText.Requisites('Text').AsString;
         result = {
             JobInfo,
             job,
@@ -15,18 +21,11 @@
             Subject : JobInfo.Name,
             JobKind : JobInfo.JobKind,
             JobState : JobInfo.State.Name,
-            JobFinalDate : JobInfo.DeadLine,
+            JobFinalDate : moment(JobInfo.DeadLine).format('DD.MM.YYYY hh:mm:ss'),
             JobID : JobInfo.ID,
-            //JobText: job.ActiveText,
             TaskID : JobInfo.TaskID,
-           // JobText : job.DetailDataSet(5).RequisiteCount,//
+            JobText : CurrentJobText,
         };
         return result;
     }
  }
-
-
-let ds = new DirectumServices();
-let ji = ds.getJobInfo(178384);
-
-//console.log(ji);
