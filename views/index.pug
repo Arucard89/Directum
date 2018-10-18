@@ -38,7 +38,8 @@ html
                         div.col-xs-1
                             div.well-sm Срок:
                         div.col-xs-3
-                            div.well.well-sm#final-date= jobInfo.JobFinalDate
+                            //если срок - пустая строка, значит, не устанавливали ограничения
+                            div.well.well-sm#final-date= jobInfo.JobFinalDate ? jobInfo.JobFinalDate : "Не установлен"
                     div.row
                         div.col-xs-12
                             div.well.well-sm#task-text(style="white-space: pre-line")= jobInfo.FullText

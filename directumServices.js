@@ -29,6 +29,8 @@ class DirectumServices {
             JobText : CurrentJobText,
             FullText : job.GetFullText(true),
         };
+        //проверяем дату
+        result.JobFinalDate = result.JobFinalDate > moment(0) ? result.JobFinalDate : '';
         return result;
     }
  }
