@@ -43,11 +43,13 @@ html
                     div.row
                         div.col-xs-12
                             div.well.well-sm#task-text(style="white-space: pre-line")= jobInfo.FullText
-                    div
-                        textarea.form-control#activeText(rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
-                    div.col-xs-offset-10
+                    -if (jobInfo.State === 'В работе') {
+                    div#active-text-container
+                        textarea.form-control#active-text(rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
+                    div.col-xs-offset-10#perform-job-container
                         div.well-sm
-                            button.btn.btn-lg.btn-success#performJob Выполнить
+                            button.btn.btn-lg.btn-success#perform-job Выполнить
+                    -}
 
 
         //подключаем необходимые скрипты

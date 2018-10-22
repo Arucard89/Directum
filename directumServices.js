@@ -22,7 +22,7 @@ class DirectumServices {
             Author : JobInfo.Author.FullName,
             Subject : JobInfo.Name,
             JobKind : JobInfo.JobKind,
-            JobState : JobInfo.State.Name,
+            State : JobInfo.State.Name,
             JobFinalDate : moment(JobInfo.DeadLine).format('DD.MM.YYYY hh:mm:ss'),
             JobID : JobInfo.ID,
             TaskID : JobInfo.TaskID,
