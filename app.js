@@ -20,6 +20,7 @@ app.use('/css', express.static(__dirname + '/CSS')); // redirect our css
 
 console.log('Подключаем функционал');
 let ds = new DirectumServices();
+
 app.get('/:jobID', (req, res) => {
     res.render('index', {jobInfo: ds.getJobInfo(req.params['jobID'])});
 });
@@ -31,7 +32,7 @@ app.get('/*', (req, res) => {
 app.use((err, request, response, next) => {
     // логирование ошибки, пока просто console.log
     console.log(err);
-    response.status(500).send(‘Something broke!’)
+    response.status(500).send('Something broke!');
 });
 
 let port = 3000;
