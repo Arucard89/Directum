@@ -15,7 +15,8 @@ class DirectumServices {
      */
     getJobInfo(id){
         let result;
-        let job = this.directum.Jobs.GetObjectByID(id);
+        let job;
+        job = this.directum.Jobs.GetObjectByID(id);
         let JobInfo = job.Info;
         let JobText = job.DetailDataSet(5);
         let locate = JobText.Locate('JobID',id);
@@ -33,6 +34,7 @@ class DirectumServices {
             TaskID : JobInfo.TaskID,
             JobText : CurrentJobText,
             FullText : job.GetFullText(true),
+            //FullText : job.GetText(2),
             AccessRights: job.AccessRights,
         };
         //проверяем дату

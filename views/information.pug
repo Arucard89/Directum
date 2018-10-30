@@ -7,10 +7,9 @@ html
         title= `Directum Viewer: Ошибка`
     body
         div.container
-            div.container#jumbotron
-                div.jumbotron
-                    h1 Ошибка
-                    p Извините, возникла непредвиденная ошибка в работе программы
+            h3= `Возникли проблемы с получением задания (ИД=${id}).`
+            div.alert.alert-warning
+                p= `Сообщение системы: ${e.description}`
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")
