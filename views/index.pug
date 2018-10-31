@@ -15,14 +15,14 @@ html
                         div.media-body
                     h1 DIRECTUM Viewer
                     p Данная система позволяет закрывать задания, поставленные Вам, не устанавливая СЭД DIRECTUM
-            h3.text-center= `Задание ИД: ${jobInfo.JobID}`
+            h3.text-center#main-header= `Задание ИД: ${jobInfo.JobID}`
             //сообщение пользователю
             -if(messageForUser){
             div.alert.alert-info messageForUser
             -}
             //форма задания
             -jobInfo = jobInfo ? jobInfo : {};
-            form(action='/performJob' method='post' name='jobForm')
+            form(action='/performJob' method='post' name='jobForm')#jobForm
                 div.container#jobCard
                     div.row
                         div.col-xs-2
@@ -52,7 +52,7 @@ html
                         textarea.form-control#active-text(name= 'ActiveText' rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
                     div.col-xs-offset-10#perform-job-container
                         div.well-sm
-                            button.btn.btn-lg.btn-success#perform-job Выполнить
+                            button(type='submit').btn.btn-lg.btn-success#perform-job Выполнить
                     -}
                     div.row
                         div.col-xs-2
@@ -69,3 +69,4 @@ html
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")
+        script(src="indexPage.js")
