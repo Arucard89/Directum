@@ -12,7 +12,7 @@ const morgan = require('morgan');
 
 
 // создаем парсер для данных application/x-www-form-urlencoded
-let urlencodedParser = bodyParser.urlencoded({extended: false});
+let jsonParser = bodyParser.json();
 
 console.log('Настраиваем окружение');
 app.set('views', './views');
@@ -26,6 +26,7 @@ app.use(morgan('short'));
 console.log('Настраиваем пути');
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
 app.use('/js', express.static(__dirname + '/node_modules/jquery/dist')); // redirect JS jQuery
+app.use('/js', express.static(__dirname + '/src')); // redirect js files
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap
 app.use('/img', express.static(__dirname + '/img')); // redirect images
 app.use('/css', express.static(__dirname + '/CSS')); // redirect our css
@@ -55,15 +56,11 @@ app.get('/job/:jobID', (req, res) => {
 
         //получаем информацию о задании
         jobInfo = ds.getJobInfo(req.params['jobID']);
-        // console.log(jobInfo.AccessRights.UserCanRead(curUser));
-        // console.log(jobInfo.AccessRights.UserCanWrite(curUser));
-        // console.log(jobInfo.AccessRights.UserCanManage(curUser));
-        // console.log(jobInfo.AccessRights.UserCanModify(curUser));
 
         if (jobInfo.AccessRights.UserCanRead(curUser)) {
             jobInfo.job.MarkAsRead;
-            //TODO нужно проверить вид задания. если только инфо, то не отображать поле ввода
-            let showAnswerField = jobInfo.AccessRights.UserCanWrite(curUser);
+            //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
+            let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.JobState === 'В работе';
             res.render('index', {jobInfo: jobInfo, showAnswerField});
         } else {
             throw Error('У Вас нет прав нв просмотр данного задания.');
@@ -74,23 +71,29 @@ app.get('/job/:jobID', (req, res) => {
     }
 });
 
-
-/*app.get('/performJob',(req, res) =>
-{
-    console.log('Нажата кнопка');
-    console.log(urlencodedParser);
-});*/
-
 //Обрабатываем полученные данные
-app.post('/performJob', urlencodedParser, (req, res) => {
+app.post('/performJob', jsonParser, (req, res) => {
     if (!req.body) return res.status(400);
-    res.send(`${req.body.ActiveText}`);
-    let text = req.body.ActiveText.trim();
+
+    //получаем данные от формы
+    let text = req.body.activeText.trim();
+    let id = req.body.id;
+    let subject = req.body.subject;
     text = text !== '' ? text : 'Выполнено';
     let jobInfo = ds.getJobInfo(req.body.id);
-    if (jobInfo){
-        jobInfo.job.MarkAsRead;
-        jobInfo.job.PerformWithResult(text);
+    //еще одна проверка задания по совпадению темы
+    try {
+        if (jobInfo.Subject === req.body.subject) {
+            jobInfo.job.MarkAsRead;
+            jobInfo.job.PerformWithResult(text);
+            res.json(`Задание выполенно с текстом:
+                         ${text}`
+            );
+        } else {
+            throw Error('Ошибка с ИД задания');
+        }
+    } catch (e) {
+        res.json('Возникла проблема с выполением задания. Обновите страницу и попробуйте еще раз.');
     }
 });
 
