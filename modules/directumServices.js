@@ -35,7 +35,6 @@ class DirectumServices {
             TaskID : JobInfo.TaskID,
             JobText : CurrentJobText,
             FullText : job.GetFullText(true),
-            //FullText : job.GetText(2),
             AccessRights: job.AccessRights,
         };
         //проверяем дату

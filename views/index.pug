@@ -7,19 +7,26 @@ html
         title= `Directum Viewer: Задание ${jobInfo.JobID}`
     body
         div.container
+
             //div.container#jumbotron
                 div.jumbotron
-                    //div.media
+                    div.media
                         div.media-left
                             img(src='/img/logo-directum.png' margin='auto')
                         div.media-body
                     h1 DIRECTUM Viewer
                     p Данная система позволяет закрывать задания, поставленные Вам, не устанавливая СЭД DIRECTUM
+
             h3.text-center#main-header= `Задание ИД: ${jobInfo.JobID}`
             //сообщение пользователю
             -if(messageForUser){
             div.alert.alert-info messageForUser
             -}
+            div.container#messages
+                //сообщения после отправки форм
+                div(style = 'display:none').alert.alert-warning#message
+                div(style = 'display:none').alert.alert-success#success-message
+                div(style = 'display:none').alert.alert-danger#error-message
             //форма задания
             -jobInfo = jobInfo ? jobInfo : {};
             form(action='/performJob' method='post' name='jobForm')#jobForm
@@ -50,9 +57,9 @@ html
                     -if (showAnswerField) {
                     div#active-text-container
                         textarea.form-control#active-text(name= 'ActiveText' rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
-                    div.col-xs-offset-10#perform-job-container
-                        div.well-sm
-                            button(type='submit').btn.btn-lg.btn-success#perform-job Выполнить
+                        div.col-xs-offset-10#perform-job-container
+                            div.well-sm
+                                button(type='submit').btn.btn-lg.btn-success#perform-job Выполнить
                     -}
                     div.row
                         div.col-xs-2
