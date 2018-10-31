@@ -16,9 +16,13 @@ html
                     h1 DIRECTUM Viewer
                     p Данная система позволяет закрывать задания, поставленные Вам, не устанавливая СЭД DIRECTUM
             h3.text-center= `Задание ИД: ${jobInfo.JobID}`
+            //сообщение пользователю
+            -if(messageForUser){
+            div.alert.alert-info messageForUser
+            -}
             //форма задания
             -jobInfo = jobInfo ? jobInfo : {};
-            form(action='/performJob')
+            form(action='/performJob' method='post' name='jobForm')
                 div.container#jobCard
                     div.row
                         div.col-xs-2
@@ -43,13 +47,24 @@ html
                     div.row
                         div.col-xs-12
                             div.well.well-sm#task-text(style="white-space: pre-line")= jobInfo.FullText
-                    -if (jobInfo.State === 'В работе') {
+                    -if (showAnswerField) {
                     div#active-text-container
-                        textarea.form-control#active-text(rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
+                        textarea.form-control#active-text(name= 'ActiveText' rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
                     div.col-xs-offset-10#perform-job-container
                         div.well-sm
                             button.btn.btn-lg.btn-success#perform-job Выполнить
                     -}
+                    div.row
+                        div.col-xs-2
+                            div.well.well-sm
+                                div.row
+                                    div.col-xs-1 ИД:
+                                    div.col-xs-2#id= jobInfo.JobID
+                        div.col-xs-4
+                            div.well.well-sm
+                                div.row
+                                    div.col-xs-5 Дата изменения:
+                                    div.col-xs-7#modify-date= jobInfo.ModifyDate
 
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")

@@ -30,6 +30,7 @@ class DirectumServices {
             JobKind : JobInfo.JobKind,
             State : JobInfo.State.Name,
             JobFinalDate : moment(JobInfo.DeadLine).format('DD.MM.YYYY hh:mm:ss'),
+            ModifyDate: moment(JobInfo.Modified).format('DD.MM.YYYY hh:mm:ss'),
             JobID : JobInfo.ID,
             TaskID : JobInfo.TaskID,
             JobText : CurrentJobText,
