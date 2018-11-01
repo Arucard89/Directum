@@ -55,14 +55,13 @@ app.get('/job/:jobID', (req, res) => {
 
         //получаем информацию о задании
         jobInfo = ds.getJobInfo(req.params['jobID']);
-        let gl = jobInfo.job.GlobalLock;
+        //let gl = jobInfo.job.GlobalLock;
 
         if (jobInfo.AccessRights.UserCanRead(curUser)) {
             //jobInfo.job.MarkAsRead;
             //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
             let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
             res.render('index', {jobInfo: jobInfo, showAnswerField});
-            jobInfo = null;
         } else {
             throw Error('У Вас нет прав на просмотр данного задания.');
         }
@@ -82,21 +81,20 @@ app.post('/performJob', jsonParser, (req, res) => {
     let id = req.body.id;
     let subject = req.body.subject;
     text = text !== '' ? text : 'Выполнено';
-    let jobInfo = ds.getJobInfo(id);
+    let jobInfo = ds.jobsCollection[id];
 
     //еще одна проверка задания по совпадению темы
     try {
         if (jobInfo && jobInfo.Subject === subject) {
-            //выполняем задание и обновляем текст
-            //let li = ds.getLockInfo(jobInfo.job);
-            //let r = li.GlobalLock.Release;
-            //jobInfo.job.GlobalLock.Locked = false;
-            //let l = jobInfo.job.GlobalLock.Locked;
+            //выполняем задание
+            jobInfo.job.ActiveText = text;
             jobInfo.job.GlobalLock.Locked;
-            jobInfo.job.MarkAsRead; 
-            jobInfo.job.PerformWithResult(text);
-            res.json({success:'Задание выполено.', text: jobInfo.FullText});
+            jobInfo.job.MarkAsRead();
+            jobInfo.job.Perform();
+            delete ds.jobsCollection[id];
+            res.json({success:'Задание выполено.'});
         } else {
+            delete ds.jobsCollection[id];
             res.json({error:'Ошибка проверки ИД задания. Обновите страницу и попробуйте еще раз.'})
         }
     } catch (e) {

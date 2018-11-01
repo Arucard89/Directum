@@ -6,6 +6,7 @@ class DirectumServices {
 
     constructor(systemcode = 'DIRECTUM'){
         this.directum = new (require('./directum'))(systemcode);
+        this.jobsCollection = [];
     }
 
     /**
@@ -39,6 +40,7 @@ class DirectumServices {
         };
         //проверяем дату
         result.JobFinalDate = result.JobFinalDate > moment(0) ? result.JobFinalDate : '';
+        this.jobsCollection[id] = result;
         return result;
     }
 
