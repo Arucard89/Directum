@@ -19,7 +19,6 @@ app.set('views', './views');
 app.set('view engine', 'pug');
 
 //подключаем логгер
-
 app.use(morgan('short'));
 
 //настраиваем пути
@@ -32,7 +31,7 @@ app.use('/img', express.static(__dirname + '/img')); // redirect images
 app.use('/css', express.static(__dirname + '/CSS')); // redirect our css
 
 console.log('Подключаем функционал');
-
+const ds = new DirectumServices();
 
 //добавляем в запрос информацию об аутентификации(req.connection.user = 'GT\...')
 app.use(function (req, res, next) {
@@ -49,7 +48,6 @@ app.use(function (req, res, next) {
 app.get('/job/:jobID', (req, res) => {
     let curUser;
     let jobInfo;
-    let ds = new DirectumServices();
     try{
         curUser = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
         //let curUser = 'revenkov_kyu';
@@ -57,9 +55,10 @@ app.get('/job/:jobID', (req, res) => {
 
         //получаем информацию о задании
         jobInfo = ds.getJobInfo(req.params['jobID']);
+        let gl = jobInfo.job.GlobalLock;
 
         if (jobInfo.AccessRights.UserCanRead(curUser)) {
-            jobInfo.job.MarkAsRead;
+            //jobInfo.job.MarkAsRead;
             //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
             let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
             res.render('index', {jobInfo: jobInfo, showAnswerField});
@@ -71,12 +70,11 @@ app.get('/job/:jobID', (req, res) => {
         res.render('information', {id : req.params['jobID'], e});
         console.log('Ошибка ' + e);
     }
-    ds = null;
 });
 
 //Обрабатываем полученные данные
 app.post('/performJob', jsonParser, (req, res) => {
-    let ds = new DirectumServices();
+
     if (!req.body) return res.status(400);
 
     //получаем данные от формы
@@ -90,17 +88,23 @@ app.post('/performJob', jsonParser, (req, res) => {
     try {
         if (jobInfo && jobInfo.Subject === subject) {
             //выполняем задание и обновляем текст
-            jobInfo.job.MarkAsRead;
+            //let li = ds.getLockInfo(jobInfo.job);
+            //let r = li.GlobalLock.Release;
+            //jobInfo.job.GlobalLock.Locked = false;
+            //let l = jobInfo.job.GlobalLock.Locked;
+            jobInfo.job.GlobalLock.Locked;
+            jobInfo.job.MarkAsRead; 
             jobInfo.job.PerformWithResult(text);
             res.json({success:'Задание выполено.', text: jobInfo.FullText});
         } else {
             res.json({error:'Ошибка проверки ИД задания. Обновите страницу и попробуйте еще раз.'})
         }
     } catch (e) {
+        console.log(ds.getLockInfo(jobInfo.job));
+        console.log(e.description);
         res.json({error:e.description.replace(/\^/g,' ')});
         console.log(e.description);
     }
-    ds = null;
 });
 
 //перехватываем favicon

@@ -50,5 +50,25 @@ class DirectumServices {
     getUserByName(name){
         return this.directum.ServiceFactory.GetUserByName(name);
     }
+
+    /**
+     * получить информацию о блокировке объекта(ILock)
+     * @param object
+     * @returns {{HostName: *, Locked: *, LockedByThis: *, ObjectID: *, ObjectType: *, SystemCode: *, UserName: *}}
+     */
+    getLockInfo(object){
+        let result = {};
+        result = {
+            GlobalLock: object.GlobalLock,
+            HostName: object.GlobalLock.HostName,
+            Locked: object.GlobalLock.Locked,
+            LockedByThis: object.GlobalLock.LockedByThis,
+            ObjectID: object.GlobalLock.ObjectID,
+            ObjectType: object.GlobalLock.ObjectType,
+            SystemCode: object.GlobalLock.SystemCode,
+            UserName: object.GlobalLock.UserName,
+        };
+        return result;
+    };
  }
 module.exports = DirectumServices;
