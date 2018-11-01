@@ -72,5 +72,24 @@ class DirectumServices {
         };
         return result;
     };
+
+    /**
+     * убрать блокировку с объекта
+     * @param job
+     * @returns {boolean}
+     */
+    unlockObject(job){
+        try {
+            let lockInfo = this.getLockInfo(job);
+            if (lockInfo.LockedByThis) {
+                lockInfo.GlobalLock.UnlockObject();
+                return true
+            } else {
+                return false
+            }
+        } catch (e) {
+            return false;
+        }
+    }
  }
 module.exports = DirectumServices;

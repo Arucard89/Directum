@@ -52,13 +52,19 @@ app.get('/job/:jobID', (req, res) => {
         curUser = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
         //let curUser = 'revenkov_kyu';
         curUser = ds.getUserByName(curUser);
-
         //получаем информацию о задании
-        jobInfo = ds.getJobInfo(req.params['jobID']);
-        //let gl = jobInfo.job.GlobalLock;
+        let id = req.params['jobID'];
+
+        //проверяем, есть ли в коллекции такое задание
+        if (!ds.jobsCollection[id]){
+            ds.getJobInfo(id);
+        }
+        jobInfo = ds.jobsCollection[id];
+        //освобождаем блокировку объекта
+        ds.unlockObject(jobInfo.job);
 
         if (jobInfo.AccessRights.UserCanRead(curUser)) {
-            //jobInfo.job.MarkAsRead;
+            jobInfo.job.MarkAsReaded();
             //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
             let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
             res.render('index', {jobInfo: jobInfo, showAnswerField});
@@ -82,26 +88,32 @@ app.post('/performJob', jsonParser, (req, res) => {
     let subject = req.body.subject;
     text = text !== '' ? text : 'Выполнено';
     let jobInfo = ds.jobsCollection[id];
-
     //еще одна проверка задания по совпадению темы
     try {
         if (jobInfo && jobInfo.Subject === subject) {
             //выполняем задание
             jobInfo.job.ActiveText = text;
-            jobInfo.job.GlobalLock.Locked;
-            jobInfo.job.MarkAsRead();
+            //console.log(jobInfo.job.GlobalLock.Locked);
+            jobInfo.job.MarkAsReaded();
             jobInfo.job.Perform();
+
+            //снимаем блокировку
+            ds.unlockObject(jobInfo.job);
+
             delete ds.jobsCollection[id];
             res.json({success:'Задание выполено.'});
         } else {
+            //снимаем блокировку
+            ds.unlockObject(jobInfo.job);
+
             delete ds.jobsCollection[id];
             res.json({error:'Ошибка проверки ИД задания. Обновите страницу и попробуйте еще раз.'})
         }
     } catch (e) {
-        console.log(ds.getLockInfo(jobInfo.job));
         console.log(e.description);
-        res.json({error:e.description.replace(/\^/g,' ')});
-        console.log(e.description);
+        //снимаем блокировку
+        ds.unlockObject(jobInfo.job);
+        res.json({error: e.description.indexOf('^') > -1 ? e.description.replace(/\^/g,' ') : e.description});
     }
 });
 
@@ -117,6 +129,7 @@ app.get('/*', (req, res) => {
 app.use((err, req, res, next) => {
     // логирование ошибки, пока просто console.log
     console.log(`При работе приложения возникла ошибка ${err}`);
+    console.log(err);
     //res.status(500).send('Что-то пошло не так!');
     res.render('error');
 });
