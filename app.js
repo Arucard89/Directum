@@ -9,6 +9,8 @@ const bodyParser = require("body-parser");
 const DirectumServices = require('./modules/directumServices');
 const nodeSSPI = require('node-sspi');
 const morgan = require('morgan');
+const favicon = require('serve-favicon');
+const path = require('path');
 
 
 // создаем парсер для данных application/x-www-form-urlencoded
@@ -31,6 +33,8 @@ app.use('/img', express.static(__dirname + '/img')); // redirect images
 app.use('/css', express.static(__dirname + '/CSS')); // redirect our css
 
 console.log('Подключаем функционал');
+
+app.use(favicon(path.join(__dirname,'img','favicon.ico')));
 const ds = new DirectumServices();
 
 //добавляем в запрос информацию об аутентификации(req.connection.user = 'GT\...')
@@ -116,6 +120,7 @@ app.post('/performJob', jsonParser, (req, res) => {
         res.json({error: e.description.indexOf('^') > -1 ? e.description.replace(/\^/g,' ') : e.description});
     }
 });
+
 
 //перехватываем favicon
 app.get('/favicon.ico', (req, res) => res.status(204));
