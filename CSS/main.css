@@ -3,3 +3,7 @@
     vertical-align: middle;
     float: none;
 }
+
+.hidden-element{
+    display:none;
+}

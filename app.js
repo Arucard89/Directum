@@ -31,6 +31,7 @@ app.use('/js', express.static(__dirname + '/src')); // redirect js files
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap
 app.use('/img', express.static(__dirname + '/img')); // redirect images
 app.use('/css', express.static(__dirname + '/CSS')); // redirect our css
+app.use('/fonts', express.static(__dirname + '/node_modules/bootstrap/fonts')); // redirect our css
 
 console.log('Подключаем функционал');
 
@@ -43,6 +44,13 @@ app.use(function (req, res, next) {
     nodeSSPIObj.authenticate(req, res, function(err){
         res.finished || next();
     })
+});
+
+/**
+ * вход на главную страницу
+ */
+app.get('/*', (req, res) => {
+    res.render('index',{mainPage: true});
 });
 
 
@@ -95,6 +103,7 @@ app.post('/performJob', jsonParser, (req, res) => {
     //еще одна проверка задания по совпадению темы
     try {
         if (jobInfo && jobInfo.Subject === subject) {
+            //todo перед выполнением задания нужно проверить не просрочено ли оно и нет ли связанных с ним заданий на указание причины
             //выполняем задание
             jobInfo.job.ActiveText = text;
             //console.log(jobInfo.job.GlobalLock.Locked);
@@ -122,9 +131,9 @@ app.post('/performJob', jsonParser, (req, res) => {
 });
 
 
-//перехватываем favicon
+/*//перехватываем favicon
 app.get('/favicon.ico', (req, res) => res.status(204));
-
+*/
 
 app.get('/*', (req, res) => {
     throw new Error('Возникла непредвиденная ошибка');

@@ -4,8 +4,28 @@ html
         meta(name="viewport" content="width=device-width, initial-scale=1")
         link(href="/css/bootstrap.min.css" rel="stylesheet")
         link(href="/css/main.css" rel="stylesheet")
-        title= `Directum Viewer: Задание ${jobInfo.JobID}`
+        -let titleText = jobInfo ? `Directum Viewer: Задание ${jobInfo.JobID}` : 'Directum Viewer';
+        title= titleText
     body
+        -if (mainPage) {
+        div.container
+            div.container#jumbotron
+                div.jumbotron
+                    div.media
+                        div.media-left
+                            img(src='/img/logo-directum.png' style='margin:auto')
+                        div.media-body
+                            h1 DIRECTUM Viewer
+                            p Данная система позволяет закрывать задания, поставленные Вам, не устанавливая СЭД DIRECTUM
+            div.container
+                div.col-xs-offset-3.col-xs-6
+                    form(action='/searchJob' method='post' name='searchJobForm')#searchJobForm
+                        div.input-group
+                            input.form-control.input-lg(type='text' name='searchText' placeholder='Введите ИД задания для поиска(только цифры)')#search-text
+                            div.input-group-btn
+                                button.btn.btn-default.input-lg(type='submit' name='searchButton')#search-button
+                                    i.glyphicon.glyphicon-search
+        -} else {
         div.container
 
             //div.container#jumbotron
@@ -72,7 +92,7 @@ html
                                 div.row
                                     div.col-xs-5 Дата изменения:
                                     div.col-xs-7#modify-date= jobInfo.ModifyDate
-
+        -}
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")

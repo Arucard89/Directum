@@ -1,3 +1,29 @@
+/**
+ * проверка введенных данных и поиск заданий
+ */
+$('#searchJobForm').submit((e) => {
+    e.preventDefault();
+    let searchText = $('#search-text').val().trim();
+    if (searchText.length === 0) {
+        alert('Введите цифры в поле ввода');
+    }
+    if (!onlyNumbersInString(searchText)) {
+        alert("ИД должно состоять только из цифр")
+    } else {
+        //ajax запрос
+    }
+});
+
+/**
+* в строке должны быть только цифры
+*/
+function onlyNumbersInString(s){
+    return s.replace(/\d/ig, '').length === 0;
+}
+
+/**
+ * переназначаем действие на нажатие кнопки отправки задания
+ */
 $('#jobForm').submit((e) => {
     e.preventDefault();
     //получаем необходимые значения
@@ -26,6 +52,10 @@ $('#jobForm').submit((e) => {
     }
 });
 
+/**
+ * получаем ответ от сервера на запрос о завершении задания
+ * @param data
+ */
 function getResponseFromServer(data) {
     let elem;
     $('#success-message').css('display','none');
