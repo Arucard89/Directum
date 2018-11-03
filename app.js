@@ -46,13 +46,6 @@ app.use(function (req, res, next) {
     })
 });
 
-/**
- * вход на главную страницу
- */
-app.get('/*', (req, res) => {
-    res.render('index',{mainPage: true});
-});
-
 
 /**
  * метод возвращает результат поиска задания по ИД
@@ -74,9 +67,11 @@ app.get('/job/:jobID', (req, res) => {
         jobInfo = ds.jobsCollection[id];
         //освобождаем блокировку объекта
         ds.unlockObject(jobInfo.job);
-
+        //проверка прав
         if (jobInfo.AccessRights.UserCanRead(curUser)) {
-            jobInfo.job.MarkAsReaded();
+            if (jobInfo.AccessRights.UserCanWrite(curUser)) {
+                jobInfo.job.MarkAsReaded();
+            }
             //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
             let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
             res.render('index', {jobInfo: jobInfo, showAnswerField});
@@ -88,6 +83,14 @@ app.get('/job/:jobID', (req, res) => {
         console.log('Ошибка ' + e);
     }
 });
+
+/**
+ * вход на главную страницу
+ */
+app.get('/*', (req, res) => {
+    res.render('index',{mainPage: true});
+});
+
 
 //Обрабатываем полученные данные
 app.post('/performJob', jsonParser, (req, res) => {
