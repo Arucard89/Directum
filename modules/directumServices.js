@@ -7,6 +7,7 @@ class DirectumServices {
     constructor(systemcode = 'DIRECTUM'){
         this.directum = new (require('./directum'))(systemcode);
         this.jobsCollection = [];
+        this.directumUsersGroup = [];
     }
 
     /**
@@ -30,8 +31,8 @@ class DirectumServices {
             Subject : JobInfo.Name,
             JobKind : JobInfo.JobKind,
             State : JobInfo.State.Name,
-            JobFinalDate : moment(JobInfo.DeadLine).format('DD.MM.YYYY hh:mm:ss'),
-            ModifyDate: moment(JobInfo.Modified).format('DD.MM.YYYY hh:mm:ss'),
+            JobFinalDate : moment(JobInfo.DeadLine).format('DD.MM.YYYY HH:mm:ss'),
+            ModifyDate: moment(JobInfo.Modified).format('DD.MM.YYYY HH:mm:ss'),
             JobID : JobInfo.ID,
             TaskID : JobInfo.TaskID,
             JobText : CurrentJobText,
@@ -50,7 +51,7 @@ class DirectumServices {
      * @returns {*} IUser
      */
     getUserByName(name){
-        return this.directum.ServiceFactory.GetUserByName(name);
+        return this.directum.ServiceFactory.GetUserByName(name.toLowerCase().replace('gt\\',''));
     }
 
     /**
@@ -91,5 +92,22 @@ class DirectumServices {
             return false;
         }
     }
- }
+
+    /**
+     * получить список пользователей в группе
+     * @param groupName
+     * @returns {*} IUserList
+     */
+    getUsersInGroup(groupName){
+        let groupObject = this.directum.ServiceFactory.GetGroupByName(groupName);
+        return this.directum.ServiceFactory.GetGroupMembers(groupObject);
+    }
+
+    //**Проверить наличие пользователя в группе
+    checkUserInGroup(userName, groupName){
+        let userObject = this.getUserByName(userName);
+        let userList = this.getUsersInGroup(groupName);
+        return userList.Find(userObject);
+    }
+}
 module.exports = DirectumServices;

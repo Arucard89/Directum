@@ -11,7 +11,16 @@ const nodeSSPI = require('node-sspi');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const path = require('path');
+const moment = require('moment');
+const rfs = require('rotating-file-stream')
 
+moment.locale('ru');
+
+// create a rotating write stream
+let accessLogStream = rfs('access.log', {
+    interval: '1d', // rotate daily
+    path: path.join(__dirname, 'log')
+});
 
 // создаем парсер для данных application/x-www-form-urlencoded
 let jsonParser = bodyParser.json();
@@ -21,7 +30,7 @@ app.set('views', './views');
 app.set('view engine', 'pug');
 
 //подключаем логгер
-app.use(morgan('short'));
+app.use(morgan('combined', { stream: accessLogStream }));
 
 //настраиваем пути
 console.log('Настраиваем пути');
@@ -47,14 +56,17 @@ app.use(function (req, res, next) {
 });
 
 
+
 /**
  * метод возвращает результат поиска задания по ИД
  */
 app.get('/job/:jobID', (req, res) => {
+    //todo получать список файлов, вложенных в задание
     let curUser;
     let jobInfo;
     try{
         curUser = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
+        //let a = ds.checkUserInGroup(curUser,'DirectumUsers');
         //let curUser = 'revenkov_kyu';
         curUser = ds.getUserByName(curUser);
         //получаем информацию о задании
@@ -79,7 +91,8 @@ app.get('/job/:jobID', (req, res) => {
             throw Error('У Вас нет прав на просмотр данного задания.');
         }
     } catch (e) {
-        res.render('information', {id : req.params['jobID'], e});
+
+        res.render('information', {id : req.params['jobID'], message: getMessageFromError(e)});
         console.log('Ошибка ' + e);
     }
 });
@@ -95,6 +108,8 @@ app.get('/*', (req, res) => {
 //Обрабатываем полученные данные
 app.post('/performJob', jsonParser, (req, res) => {
 
+    let curUser = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
+
     if (!req.body) return res.status(400);
 
     //получаем данные от формы
@@ -107,6 +122,14 @@ app.post('/performJob', jsonParser, (req, res) => {
     try {
         if (jobInfo && jobInfo.Subject === subject) {
             //todo перед выполнением задания нужно проверить не просрочено ли оно и нет ли связанных с ним заданий на указание причины
+            //если пользователь в группе делопроизводителей или в группе польхзователей директума, то пусть пользуется приложением
+            if (ds.checkUserInGroup(curUser, 'DirectumUsers') || ds.checkUserInGroup(curUser, 'СЕКР')){
+                res.json({error:'Вы входите в группу пользователей директума или в группу делопроизодителей. Установите приложение через корпоративный портал и используйте полную версию.'});
+            }
+            //проверяем не просрочено ли задание
+            if (jobInfo.JobFinalDate !== '' && jobInfo.JobFinalDate < moment()){
+
+            }
             //выполняем задание
             jobInfo.job.ActiveText = text;
             //console.log(jobInfo.job.GlobalLock.Locked);
@@ -126,10 +149,10 @@ app.post('/performJob', jsonParser, (req, res) => {
             res.json({error:'Ошибка проверки ИД задания. Обновите страницу и попробуйте еще раз.'})
         }
     } catch (e) {
-        console.log(e.description);
+        console.log(getMessageFromError(e));
         //снимаем блокировку
         ds.unlockObject(jobInfo.job);
-        res.json({error: e.description.indexOf('^') > -1 ? e.description.replace(/\^/g,' ') : e.description});
+        res.json({error: getMessageFromError(e)});
     }
 });
 
@@ -137,11 +160,15 @@ app.post('/performJob', jsonParser, (req, res) => {
 /*//перехватываем favicon
 app.get('/favicon.ico', (req, res) => res.status(204));
 */
-
+/*
 app.get('/*', (req, res) => {
     throw new Error('Возникла непредвиденная ошибка');
 });
+*/
 
+app.get('/file/:id', (req, res) => {
+    console.log('Здесь будет загрузка файлов');
+});
 
 app.use((err, req, res, next) => {
     // логирование ошибки, пока просто console.log
@@ -156,3 +183,13 @@ let port = 3000;
 app.listen(port);
 console.log(`Запуск сервера. Порт: ${port}`);
 
+/**
+ * получаем сообщение из ошибки для вывода на страницу
+ * @param e
+ * @returns {*}
+ */
+function getMessageFromError(e) {
+    let mes = e.description ? e.description : e.toString();
+    mes = mes.replace(/\^/g,' ');
+    return mes;
+}

@@ -4,11 +4,11 @@ html
         meta(name="viewport" content="width=device-width, initial-scale=1")
         link(href="/css/bootstrap.min.css" rel="stylesheet")
         link(href="/css/main.css" rel="stylesheet")
+        -jobInfo = jobInfo ? jobInfo : {};
         -let titleText = jobInfo ? `Directum Viewer: Задание ${jobInfo.JobID}` : 'Directum Viewer';
         title= titleText
     body
-        -if (mainPage) {
-        div.container
+        div.container#search-container(class= mainPage ? "" : "hidden-element")
             div.container#jumbotron
                 div.jumbotron
                     div.media
@@ -25,18 +25,8 @@ html
                             div.input-group-btn
                                 button.btn.btn-default.input-lg(type='submit' name='searchButton')#search-button
                                     i.glyphicon.glyphicon-search
-        -} else {
-        div.container
-
-            //div.container#jumbotron
-                div.jumbotron
-                    div.media
-                        div.media-left
-                            img(src='/img/logo-directum.png' margin='auto')
-                        div.media-body
-                    h1 DIRECTUM Viewer
-                    p Данная система позволяет закрывать задания, поставленные Вам, не устанавливая СЭД DIRECTUM
-
+            div.container#search-results
+        div.container#form-container(class= !mainPage ? "" : "hidden-element")
             h3.text-center#main-header= `Задание ИД: ${jobInfo.JobID}`
             //сообщение пользователю
             -if(messageForUser){
@@ -92,7 +82,6 @@ html
                                 div.row
                                     div.col-xs-5 Дата изменения:
                                     div.col-xs-7#modify-date= jobInfo.ModifyDate
-        -}
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")

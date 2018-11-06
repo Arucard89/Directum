@@ -9,7 +9,7 @@ html
         div.container
             h3= `Возникли проблемы с получением задания (ИД=${id}).`
             div.alert.alert-warning
-                p= `Сообщение системы: ${e.description}`
+                p= `Сообщение системы: ${message}`
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")
