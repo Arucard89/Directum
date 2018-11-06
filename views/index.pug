@@ -33,10 +33,12 @@ html
             div.alert.alert-info messageForUser
             -}
             div.container#messages
+                //сообщение при отправке
+                div.alert.alert-info.hidden-element#loading-message Отправка данных на сервер
                 //сообщения после отправки форм
-                div(style = 'display:none').alert.alert-warning#message
-                div(style = 'display:none').alert.alert-success#success-message
-                div(style = 'display:none').alert.alert-danger#error-message
+                div.alert.alert-warning.hidden-element#message
+                div.alert.alert-success.hidden-element#success-message
+                div.alert.alert-danger.hidden-element#error-message
             //форма задания
             -jobInfo = jobInfo ? jobInfo : {};
             form(action='/performJob' method='post' name='jobForm')#jobForm
@@ -62,11 +64,22 @@ html
                             //если срок - пустая строка, значит, не устанавливали ограничения
                             div.well.well-sm#final-date= jobInfo.JobFinalDate ? jobInfo.JobFinalDate : "Не установлен"
                     div.row
-                        div.col-xs-12
-                            div.well.well-sm#task-text(style="white-space: pre-line")= jobInfo.FullText
+                        div.col-xs-8
+                            div.well.well-sm.task-text-row#task-text= jobInfo.FullText
+                        div.col-xs-4
+                            div.panel.panel-default.task-text-row
+                                div.panel-heading Вложения
+                                //ul.list-group.panel-body
+                                //    li.list-group-item
+                                //        i.glyphicon.glyphicon-file
+                                //        span один
+                                //    li.list-group-item 2
+                                //    li.list-group-item 3
+                                //    li.list-group-item 4
                     -if (showAnswerField) {
+
                     div#active-text-container
-                        textarea.form-control#active-text(name= 'ActiveText' rows='5' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
+                        textarea.form-control#active-text(name= 'ActiveText' rows='2' placeholder='Введите сюда комментарии к выполнению, если это необходимо')
                         div.col-xs-offset-10#perform-job-container
                             div.well-sm
                                 button(type='submit').btn.btn-lg.btn-success#perform-job Выполнить

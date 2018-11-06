@@ -7,3 +7,13 @@
 .hidden-element{
     display:none;
 }
+
+textarea{
+    overflow: auto;
+}
+
+.task-text-row{
+    white-space: pre-line;
+    overflow: auto;
+    height: 200px;
+}

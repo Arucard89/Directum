@@ -39,6 +39,10 @@ $('#jobForm').submit((e) => {
     //сравниваем ID, чтобы убедиься в правильности
     let headerID = $('#main-header').text().replace('Задание ИД: ','').trim();
 
+    //при загрузке делаем все неактивным
+    showOnlyOneMessage('loading-message');
+    $('#active-text-container').addClass('hidden-element');
+
     if (jobId === headerID){
         //ид в заголовке и ид в футере совпадают, здачит, отправляем на сервер
         $.ajax({
@@ -63,25 +67,33 @@ $('#jobForm').submit((e) => {
  */
 function getResponseFromServer(data) {
     let elem;
-    $('#success-message').css('display','none');
-    $('#error-message').css('style','none');
-    $('#message').css('style','none');
+    $('#active-text-container').removeClass('hidden-element');
     if (data.error){
         elem = $('#error-message');
         elem.text(data.error);
-        elem.removeAttr('style');
+        showOnlyOneMessage('error-message');
     } else if (data.success) {
         elem = $('#success-message');
         elem.text(data.success);
-        elem.removeAttr('style');
+        showOnlyOneMessage('success-message');
         //обновляем текст задачи
         let taskText = data.text ? data.text : $('#task-text').text();
         $('#task-text').text(taskText);
-        $('#active-text-container').css('display','none');
+        $('#active-text-container').addClass('hidden-element');
     } else if (data.message) {
         elem = $('#message');
         elem.text(data.message);
-        elem.removeAttr('style');
+        showOnlyOneMessage('message');
     }
 
+}
+
+function showOnlyOneMessage(id){
+    $('#loading-message').addClass('hidden-element');
+    $('#success-message').addClass('hidden-element');
+    $('#error-message').addClass('hidden-element');
+    $('#message').addClass('hidden-element');
+    if (id) {
+        $(`#${id}`).removeClass('hidden-element');
+    }
 }

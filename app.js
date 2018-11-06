@@ -125,6 +125,8 @@ app.post('/performJob', jsonParser, (req, res) => {
             //если пользователь в группе делопроизводителей или в группе польхзователей директума, то пусть пользуется приложением
             if (ds.checkUserInGroup(curUser, 'DirectumUsers') || ds.checkUserInGroup(curUser, 'СЕКР')){
                 res.json({error:'Вы входите в группу пользователей директума или в группу делопроизодителей. Установите приложение через корпоративный портал и используйте полную версию.'});
+                ds.unlockObject(jobInfo.job);
+                return;
             }
             //проверяем не просрочено ли задание
             if (jobInfo.JobFinalDate !== '' && jobInfo.JobFinalDate < moment()){
