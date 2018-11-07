@@ -69,6 +69,14 @@ html
                         div.col-xs-4
                             div.panel.panel-default.task-text-row
                                 div.panel-heading Вложения
+                                //div.panel-body
+                                ul.list-group.panel-body
+                                    if attachments
+                                        each att in attachments
+                                            li.list-group-item
+                                                a(href= att.href)
+                                                    i.glyphicon.glyphicon-file
+                                                    span= att.fullName
                                 //ul.list-group.panel-body
                                 //    li.list-group-item
                                 //        i.glyphicon.glyphicon-file

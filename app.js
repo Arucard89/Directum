@@ -12,7 +12,10 @@ const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const path = require('path');
 const moment = require('moment');
-const rfs = require('rotating-file-stream')
+const rfs = require('rotating-file-stream');
+
+const ATTACHMENT_PATH = '/att/';
+const JOBS_PATH = '/job/';
 
 moment.locale('ru');
 
@@ -55,20 +58,17 @@ app.use(function (req, res, next) {
     })
 });
 
-
-
 /**
  * метод возвращает результат поиска задания по ИД
  */
 app.get('/job/:jobID', (req, res) => {
     //todo получать список файлов, вложенных в задание
-    let curUser;
     let jobInfo;
     try{
-        curUser = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
+        let curUserName = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
         //let a = ds.checkUserInGroup(curUser,'DirectumUsers');
         //let curUser = 'revenkov_kyu';
-        curUser = ds.getUserByName(curUser);
+        let curUser = ds.getUserByName(curUserName);
         //получаем информацию о задании
         let id = req.params['jobID'];
 
@@ -77,6 +77,7 @@ app.get('/job/:jobID', (req, res) => {
             ds.getJobInfo(id);
         }
         jobInfo = ds.jobsCollection[id];
+
         //освобождаем блокировку объекта
         ds.unlockObject(jobInfo.job);
         //проверка прав
@@ -86,7 +87,21 @@ app.get('/job/:jobID', (req, res) => {
             }
             //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
             let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
-            res.render('index', {jobInfo: jobInfo, showAnswerField});
+
+            //получаем список вложений и их свойства для отображения на странице
+            let atts = ds.getAttachmentListForUser(jobInfo.job, curUserName);
+            let attachments = [];
+            for (let att of atts) {
+                let docProp = ds.getDocumentProperties(att);
+                if (docProp) {
+                    //добавляем в свойства ссылку
+                    docProp.href = ATTACHMENT_PATH + docProp.docInfo.ID;
+                    //добавляем имя файла
+                    docProp.fullName = `${docProp.docName}.${docProp.fileExtension}(${docProp.docInfo.ID})`;
+                    attachments.push(docProp);
+                }
+            }
+            res.render('index', {jobInfo: jobInfo, attachments, showAnswerField});
         } else {
             throw Error('У Вас нет прав на просмотр данного задания.');
         }
@@ -94,6 +109,7 @@ app.get('/job/:jobID', (req, res) => {
 
         res.render('information', {id : req.params['jobID'], message: getMessageFromError(e)});
         console.log('Ошибка ' + e);
+        console.log(e);
     }
 });
 

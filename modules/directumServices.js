@@ -103,11 +103,81 @@ class DirectumServices {
         return this.directum.ServiceFactory.GetGroupMembers(groupObject);
     }
 
-    //**Проверить наличие пользователя в группе
+    /**
+     * Проверить наличие пользователя в группе
+     * @param userName
+     * @param groupName
+     * @returns {*}
+     */
     checkUserInGroup(userName, groupName){
         let userObject = this.getUserByName(userName);
         let userList = this.getUsersInGroup(groupName);
         return userList.Find(userObject);
     }
+
+    /**
+     * получить список вложений(только документы ctEDocument = 8)
+     * @param job
+     * @returns {*} Info массив
+     */
+    getAttachmentsList(job) {
+        let atts = [];
+        let attObj = job.GetAttachments(true).Values;
+        console.log(attObj.Count);
+        attObj.Reset();
+        while (!attObj.EOF) {
+            let attachment = attObj.Value.ObjectInfo;
+            console.log(attachment.ComponentType);
+            if (attachment.ComponentType == 8){
+                atts.push(attachment)
+            }
+            attObj.Next();
+        }
+        return atts;
+    }
+
+    /**
+     * получает список доступных пользователю вложений(инфо)
+     * @param job
+     * @param userName
+     * @returns {Array} info
+     */
+    getAttachmentListForUser(job, userName){
+        let attForUser = [];
+        let userObject = this.getUserByName(userName);
+        let attList = this.getAttachmentsList(job);
+        if (attList) {
+            for(let att of attList) {
+                let doc = this.directum.EDocuments.getObjectByID(att.ID);
+                // Проверить права на документ у Исполнителя, если есть права то добавлять, иначе пропускать
+                let accessRights = doc.AccessRights;
+                if (accessRights.UserCanRead(userObject)){
+                    attForUser.push(att);
+                }
+            }
+        }
+        return attForUser;
+    }
+
+    /**
+     * получаем основные параметры документа для отображения
+     * @param docInfo
+     * @returns {{fileExtension: *, sizeFile: *, docName: string, docInfo: *, lastVersionDoc: *}}
+     */
+    getDocumentProperties(docInfo){
+        let doc = this.directum.EDocuments.getObjectByID(docInfo.ID);
+        let oneVersionDoc = doc.Versions.Values(doc.Versions.Count - 1);
+        let fileExtension = oneVersionDoc.Editor.Extension;
+        let sizeFile = oneVersionDoc.Size;
+        let docName = docInfo.Name;
+        return {
+            fileExtension,
+            sizeFile,
+            docName,
+            docInfo,
+            lastVersionDoc: oneVersionDoc,
+        }
+    }
+
 }
 module.exports = DirectumServices;
