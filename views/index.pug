@@ -74,16 +74,12 @@ html
                                     if attachments
                                         each att in attachments
                                             li.list-group-item
-                                                a(href= att.href)
-                                                    i.glyphicon.glyphicon-file
-                                                    span= att.fullName
-                                //ul.list-group.panel-body
-                                //    li.list-group-item
-                                //        i.glyphicon.glyphicon-file
-                                //        span один
-                                //    li.list-group-item 2
-                                //    li.list-group-item 3
-                                //    li.list-group-item 4
+                                                a(target="_blank" href=att.href)
+                                                    div.media
+                                                        div.media-left
+                                                            img.media-object(src='/img/doc_icon.png' style='margin:auto')
+                                                        div.media-body
+                                                            p= att.fullName
                     -if (showAnswerField) {
 
                     div#active-text-container

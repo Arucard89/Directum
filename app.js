@@ -13,6 +13,7 @@ const favicon = require('serve-favicon');
 const path = require('path');
 const moment = require('moment');
 const rfs = require('rotating-file-stream');
+const fs = require('fs');
 
 const ATTACHMENT_PATH = '/att/';
 const JOBS_PATH = '/job/';
@@ -92,7 +93,7 @@ app.get('/job/:jobID', (req, res) => {
             let atts = ds.getAttachmentListForUser(jobInfo.job, curUserName);
             let attachments = [];
             for (let att of atts) {
-                let docProp = ds.getDocumentProperties(att);
+                let docProp = ds.getDocumentPropertiesByInfo(att);
                 if (docProp) {
                     //добавляем в свойства ссылку
                     docProp.href = ATTACHMENT_PATH + docProp.docInfo.ID;
@@ -113,15 +114,12 @@ app.get('/job/:jobID', (req, res) => {
     }
 });
 
+
+
+
 /**
- * вход на главную страницу
+ *  Обрабатываем полученные данные о выполнении
  */
-app.get('/*', (req, res) => {
-    res.render('index',{mainPage: true});
-});
-
-
-//Обрабатываем полученные данные
 app.post('/performJob', jsonParser, (req, res) => {
 
     let curUser = req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
@@ -174,6 +172,14 @@ app.post('/performJob', jsonParser, (req, res) => {
     }
 });
 
+/**
+ * загружаем файл с сервера
+ */
+app.get(`${ATTACHMENT_PATH}:fileID`, (req, res) => {
+    let fileID = req.params['fileID'];
+    let curUser = getUserName(req);
+    sendFileToClient(ds.downloadDocument(fileID, curUser), res);
+});
 
 /*//перехватываем favicon
 app.get('/favicon.ico', (req, res) => res.status(204));
@@ -186,6 +192,13 @@ app.get('/*', (req, res) => {
 
 app.get('/file/:id', (req, res) => {
     console.log('Здесь будет загрузка файлов');
+});
+
+/**
+ * вход на главную страницу
+ */
+app.get('/*', (req, res) => {
+    res.render('index',{mainPage: true});
 });
 
 app.use((err, req, res, next) => {
@@ -210,4 +223,32 @@ function getMessageFromError(e) {
     let mes = e.description ? e.description : e.toString();
     mes = mes.replace(/\^/g,' ');
     return mes;
+}
+
+/**
+ * передать файл клиенту
+ * @param filePath
+ * @param res
+ * @returns {boolean}
+ */
+function sendFileToClient(filePath, res) {
+    try {
+        //res.writeHead(200);
+        res.setHeader('Content-disposition', 'attachment; filename='+ path.basename(filePath));
+        res.status(200);
+        fs.createReadStream(filePath).pipe(res);
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+}
+
+/**
+ * получаем имя пользователя из входящего запроса
+ * @param req
+ * @returns {string}
+ */
+function getUserName(req){
+    return req.connection.user.toLowerCase().replace('gt\\',''); //логин пользователя
 }

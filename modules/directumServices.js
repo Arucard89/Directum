@@ -1,4 +1,6 @@
 const moment = require('moment');
+const path = require('path');
+const DOWNLOADS_PATH = './downloads/';
 
 moment.locale('ru');
 
@@ -123,11 +125,9 @@ class DirectumServices {
     getAttachmentsList(job) {
         let atts = [];
         let attObj = job.GetAttachments(true).Values;
-        console.log(attObj.Count);
         attObj.Reset();
         while (!attObj.EOF) {
             let attachment = attObj.Value.ObjectInfo;
-            console.log(attachment.ComponentType);
             if (attachment.ComponentType == 8){
                 atts.push(attachment)
             }
@@ -149,7 +149,7 @@ class DirectumServices {
         if (attList) {
             for(let att of attList) {
                 let doc = this.directum.EDocuments.getObjectByID(att.ID);
-                // Проверить права на документ у Исполнителя, если есть права то добавлять, иначе пропускать
+                // Проверить права на документ у пользователя, если есть права то добавлять, иначе пропускать
                 let accessRights = doc.AccessRights;
                 if (accessRights.UserCanRead(userObject)){
                     attForUser.push(att);
@@ -160,13 +160,13 @@ class DirectumServices {
     }
 
     /**
-     * получаем основные параметры документа для отображения
+     * получаем основные параметры документа для отображения по Info
      * @param docInfo
      * @returns {{fileExtension: *, sizeFile: *, docName: string, docInfo: *, lastVersionDoc: *}}
      */
-    getDocumentProperties(docInfo){
+    getDocumentPropertiesByInfo(docInfo){
         let doc = this.directum.EDocuments.getObjectByID(docInfo.ID);
-        let oneVersionDoc = doc.Versions.Values(doc.Versions.Count - 1);
+        let oneVersionDoc = this.getLastVersion(doc);
         let fileExtension = oneVersionDoc.Editor.Extension;
         let sizeFile = oneVersionDoc.Size;
         let docName = docInfo.Name;
@@ -175,8 +175,63 @@ class DirectumServices {
             sizeFile,
             docName,
             docInfo,
-            lastVersionDoc: oneVersionDoc,
         }
+    }
+
+    /**
+     * получаем основные параметры документа для отображения по id
+     * @param docInfo
+     * @returns {{fileExtension: *, sizeFile: *, docName: string, docInfo: *, lastVersionDoc: *}}
+     */
+    getDocumentPropertiesByID(ID){
+        let doc = this.directum.EDocuments.getObjectByID(ID);
+        let oneVersionDoc = this.getLastVersion(doc); //последняя версия документа
+        let fileExtension = oneVersionDoc.Editor.Extension.toLowerCase();
+        let sizeFile = oneVersionDoc.Size;
+        let docName = doc.Name;
+        return {
+            fileExtension,
+            sizeFile,
+            docName,
+            docInfo: doc.ObjectInfo,
+        }
+    }
+
+    /**
+     * загрузка документа из директума в папку
+     * @param id
+     * @param userName
+     * @returns {string}
+     */
+    downloadDocument(id, userName){
+        //todo добавить флаг перезаписи файла.(проверять наличие файла в папке, если уже есть и флаг установлен, то перезаписывать, если не установлен, то, просто, возвращать путь)
+        let docPath = '';
+        try {
+            let doc = this.directum.EDocuments.getObjectByID(id);
+            // Проверить права на документ у пользователя, если есть права то экспортируем, иначе пропускать
+            let accessRights = doc.AccessRights;
+            if (accessRights.UserCanRead(this.getUserByName(userName))) {
+                //определяем путь
+                let docProps = this.getDocumentPropertiesByID(id);
+                docPath = `${DOWNLOADS_PATH}${id}.${docProps.fileExtension}`;
+                docPath = path.join(__dirname, docPath);
+                let docLastVersion = this.getLastVersion(doc);
+                docLastVersion.Export(docPath);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        return docPath;
+    }
+
+    /**
+     * получить последнюю версию документа
+     * @param doc объект документа
+     * @returns {*} ссылка на последнюю версию документа
+     */
+    getLastVersion(doc){
+        return doc.Versions.Values(doc.Versions.Count - 1); //последняя версия документа
+
     }
 
 }
