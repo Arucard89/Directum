@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "directum-viewer-service",
   "version": "1.0.0",
   "description": "Сервис для просмотра и закрытия задач для пользователей, не подключенных к системе Directum",
@@ -30,5 +30,5 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/Arucard89/Directum-viewer-service.git"
-  }	
+  }
 }

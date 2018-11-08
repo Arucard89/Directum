@@ -10,7 +10,7 @@ html
             div.container#jumbotron
                 div.jumbotron
                     h1 Ошибка
-                    p Извините, возникла непредвиденная ошибка в работе программы
+                    p= errorText ? errorText : 'Извините, возникла непредвиденная ошибка в работе программы'
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")

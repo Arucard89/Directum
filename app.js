@@ -1,6 +1,5 @@
 /**
- * Запуск процесса должен происходить от имени администратора директум
- *
+ * Запуск процесса должен происходить от имени администратора директум(или пользователя с его правами)
  */
 
 const express = require('express');
@@ -19,6 +18,9 @@ const ATTACHMENT_PATH = '/att/';
 const JOBS_PATH = '/job/';
 
 moment.locale('ru');
+
+//устанавливаем глобальную переменную
+global.appRoot = path.resolve(__dirname);
 
 // create a rotating write stream
 let accessLogStream = rfs('access.log', {
@@ -178,20 +180,10 @@ app.post('/performJob', jsonParser, (req, res) => {
 app.get(`${ATTACHMENT_PATH}:fileID`, (req, res) => {
     let fileID = req.params['fileID'];
     let curUser = getUserName(req);
-    sendFileToClient(ds.downloadDocument(fileID, curUser), res);
-});
-
-/*//перехватываем favicon
-app.get('/favicon.ico', (req, res) => res.status(204));
-*/
-/*
-app.get('/*', (req, res) => {
-    throw new Error('Возникла непредвиденная ошибка');
-});
-*/
-
-app.get('/file/:id', (req, res) => {
-    console.log('Здесь будет загрузка файлов');
+    if (!sendFileToClient(ds.downloadDocument(fileID, curUser), res)){
+        let errorText = 'У Вас нет прав на просмотр данного документа. Обновите страницу задания, чтобы получить актуальный список файлов.';
+        res.render('error', {errorText})
+    }
 });
 
 /**
@@ -205,7 +197,6 @@ app.use((err, req, res, next) => {
     // логирование ошибки, пока просто console.log
     console.log(`При работе приложения возникла ошибка ${err}`);
     console.log(err);
-    //res.status(500).send('Что-то пошло не так!');
     res.render('error');
 });
 
@@ -232,8 +223,11 @@ function getMessageFromError(e) {
  * @returns {boolean}
  */
 function sendFileToClient(filePath, res) {
+    //если пустое имя файла, значит, файл недоступен
+    if (!filePath){
+        return false
+    }
     try {
-        //res.writeHead(200);
         res.setHeader('Content-disposition', 'attachment; filename='+ path.basename(filePath));
         res.status(200);
         fs.createReadStream(filePath).pipe(res);

@@ -1,6 +1,6 @@
 const moment = require('moment');
 const path = require('path');
-const DOWNLOADS_PATH = './downloads/';
+const DOWNLOADS_PATH = '/downloads/';
 
 moment.locale('ru');
 
@@ -78,12 +78,12 @@ class DirectumServices {
 
     /**
      * убрать блокировку с объекта
-     * @param job
+     * @param object
      * @returns {boolean}
      */
-    unlockObject(job){
+    unlockObject(object){
         try {
-            let lockInfo = this.getLockInfo(job);
+            let lockInfo = this.getLockInfo(object);
             if (lockInfo.LockedByThis) {
                 lockInfo.GlobalLock.UnlockObject();
                 return true
@@ -154,6 +154,7 @@ class DirectumServices {
                 if (accessRights.UserCanRead(userObject)){
                     attForUser.push(att);
                 }
+                this.unlockObject(doc);
             }
         }
         return attForUser;
@@ -170,6 +171,7 @@ class DirectumServices {
         let fileExtension = oneVersionDoc.Editor.Extension;
         let sizeFile = oneVersionDoc.Size;
         let docName = docInfo.Name;
+        this.unlockObject(doc);
         return {
             fileExtension,
             sizeFile,
@@ -180,7 +182,7 @@ class DirectumServices {
 
     /**
      * получаем основные параметры документа для отображения по id
-     * @param docInfo
+     * @param ID
      * @returns {{fileExtension: *, sizeFile: *, docName: string, docInfo: *, lastVersionDoc: *}}
      */
     getDocumentPropertiesByID(ID){
@@ -189,6 +191,7 @@ class DirectumServices {
         let fileExtension = oneVersionDoc.Editor.Extension.toLowerCase();
         let sizeFile = oneVersionDoc.Size;
         let docName = doc.Name;
+        this.unlockObject(doc);
         return {
             fileExtension,
             sizeFile,
@@ -201,11 +204,13 @@ class DirectumServices {
      * загрузка документа из директума в папку
      * @param id
      * @param userName
+     * @param pathForDownload
      * @returns {string}
      */
-    downloadDocument(id, userName){
+    downloadDocument(id, userName, pathForDownload = ""){
         //todo добавить флаг перезаписи файла.(проверять наличие файла в папке, если уже есть и флаг установлен, то перезаписывать, если не установлен, то, просто, возвращать путь)
         let docPath = '';
+        let docLastVersion;
         try {
             let doc = this.directum.EDocuments.getObjectByID(id);
             // Проверить права на документ у пользователя, если есть права то экспортируем, иначе пропускать
@@ -213,13 +218,21 @@ class DirectumServices {
             if (accessRights.UserCanRead(this.getUserByName(userName))) {
                 //определяем путь
                 let docProps = this.getDocumentPropertiesByID(id);
-                docPath = `${DOWNLOADS_PATH}${id}.${docProps.fileExtension}`;
-                docPath = path.join(__dirname, docPath);
-                let docLastVersion = this.getLastVersion(doc);
+                if (!pathForDownload) {
+                    docPath = `${DOWNLOADS_PATH}${id}.${docProps.fileExtension}`;
+                    docPath = path.join(global.appRoot, docPath);
+                } else {
+                    docPath = pathForDownload;
+                }
+                docLastVersion = this.getLastVersion(doc);
                 docLastVersion.Export(docPath);
+                this.unlockObject(docLastVersion);
+            } else {
+                console.log(`У пользователя ${userName} нет прав на документ id=${id}`);
             }
         } catch (e) {
             console.log(e);
+            this.unlockObject(docLastVersion);
         }
         return docPath;
     }
@@ -230,8 +243,9 @@ class DirectumServices {
      * @returns {*} ссылка на последнюю версию документа
      */
     getLastVersion(doc){
-        return doc.Versions.Values(doc.Versions.Count - 1); //последняя версия документа
-
+        let lastVersion = doc.Versions.Values(doc.Versions.Count - 1); //последняя версия документа
+        this.unlockObject(lastVersion);
+        return lastVersion;
     }
 
 }
