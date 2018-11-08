@@ -88,8 +88,8 @@ app.get('/job/:jobID', (req, res) => {
             if (jobInfo.AccessRights.UserCanWrite(curUser)) {
                 jobInfo.job.MarkAsReaded();
             }
-            //проверяем тип задания(не уведомление), права пользователя и состояние задания отображения текстовой информации
-            let showAnswerField = jobInfo.JobKind !== 1 && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
+            //проверяем тип задания(не уведомление и не контроль), права пользователя и состояние задания отображения текстовой информации
+            let showAnswerField = jobInfo.JobKind ===0  && jobInfo.AccessRights.UserCanWrite(curUser) && jobInfo.State === 'В работе';
 
             //получаем список вложений и их свойства для отображения на странице
             let atts = ds.getAttachmentListForUser(jobInfo.job, curUserName);
@@ -116,9 +116,6 @@ app.get('/job/:jobID', (req, res) => {
     }
 });
 
-
-
-
 /**
  *  Обрабатываем полученные данные о выполнении
  */
@@ -138,8 +135,10 @@ app.post('/performJob', jsonParser, (req, res) => {
     try {
         if (jobInfo && jobInfo.Subject === subject) {
             //todo перед выполнением задания нужно проверить не просрочено ли оно и нет ли связанных с ним заданий на указание причины
-            //если пользователь в группе делопроизводителей или в группе польхзователей директума, то пусть пользуется приложением
-            if (ds.checkUserInGroup(curUser, 'DirectumUsers') || ds.checkUserInGroup(curUser, 'СЕКР')){
+            //если пользователь в группе делопроизводителей или в группе пользователей директума, то пусть пользуется приложением
+            let useDesktopVersion = ds.checkUserInGroup(curUser, 'DirectumUsers') || ds.checkUserInGroup(curUser, 'СЕКР');
+            useDesktopVersion = useDesktopVersion && !ds.checkUserInGroup(curUser, 'ОДК_тестовая_группа'); //для тестирования
+            if (useDesktopVersion){
                 res.json({error:'Вы входите в группу пользователей директума или в группу делопроизодителей. Установите приложение через корпоративный портал и используйте полную версию.'});
                 ds.unlockObject(jobInfo.job);
                 return;
@@ -150,7 +149,6 @@ app.post('/performJob', jsonParser, (req, res) => {
             }
             //выполняем задание
             jobInfo.job.ActiveText = text;
-            //console.log(jobInfo.job.GlobalLock.Locked);
             jobInfo.job.MarkAsReaded();
             jobInfo.job.Perform();
 
@@ -199,7 +197,6 @@ app.use((err, req, res, next) => {
     console.log(err);
     res.render('error');
 });
-
 
 let port = 3000;
 app.listen(port);
