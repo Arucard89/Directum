@@ -1,6 +1,7 @@
 const moment = require('moment');
 const path = require('path');
 const DOWNLOADS_PATH = '/downloads/';
+const JOB_KINDS = ['Задание','Уведомление','Задание-контроль'];
 
 moment.locale('ru');
 
@@ -32,6 +33,7 @@ class DirectumServices {
             Author : JobInfo.Author.FullName,
             Subject : JobInfo.Name,
             JobKind : JobInfo.JobKind,
+            JobKindName : JOB_KINDS[JobInfo.JobKind],
             State : JobInfo.State.Name,
             JobFinalDate : moment(JobInfo.DeadLine).format('DD.MM.YYYY HH:mm:ss'),
             ModifyDate: moment(JobInfo.Modified).format('DD.MM.YYYY HH:mm:ss'),
@@ -41,8 +43,8 @@ class DirectumServices {
             FullText : job.GetFullText(true),
             AccessRights: job.AccessRights,
         };
-        //проверяем дату
-        result.JobFinalDate = result.JobFinalDate > moment(0) ? result.JobFinalDate : '';
+        //проверяем дату(если присутствует год 1899, значит, не установлена)
+        result.JobFinalDate = result.JobFinalDate.indexOf('1899') === -1  ? result.JobFinalDate : '';
         this.jobsCollection[id] = result;
         return result;
     }

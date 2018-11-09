@@ -100,6 +100,11 @@ html
                                 div.row
                                     div.col-xs-5 Дата изменения:
                                     div.col-xs-7#modify-date= jobInfo.ModifyDate
+                        div.col-xs-4
+                            div.well.well-sm
+                                div.row
+                                    div.col-xs-5 Тип задания:
+                                    div.col-xs-7#job-kind= jobInfo.JobKindName
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")
