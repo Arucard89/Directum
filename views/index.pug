@@ -46,21 +46,25 @@ html
                 div.container#jobCard
                     div.row
                         div.col-xs-2
-                            div.well-sm Тема:
+                            div.well-sm
+                                strong Тема:
                         div.col-xs-10
                             div.well.well-sm#subject= jobInfo.Subject
                     div.row
                         div.col-xs-2
-                            div.well-sm Инициатор:
+                            div.well-sm
+                                strong Инициатор:
                         div.col-xs-10
                             div.well.well-sm#author= jobInfo.Author
                     div.row
                         div.col-xs-2
-                            div.well-sm Исполнитель:
+                            div.well-sm
+                                strong Исполнитель:
                         div.col-xs-6
                             div.well.well-sm#performer= jobInfo.Performer
                         div.col-xs-1
-                            div.well-sm Срок:
+                            div.well-sm
+                                strong Срок:
                         div.col-xs-3
                             //если срок - пустая строка, значит, не устанавливали ограничения
                             div.well.well-sm#final-date= jobInfo.JobFinalDate ? jobInfo.JobFinalDate : "Не установлен"
@@ -69,7 +73,8 @@ html
                             div.well.well-sm.task-text-row#task-text= jobInfo.FullText
                         div.col-xs-4
                             div.panel.panel-default.task-text-row
-                                div.panel-heading Вложения
+                                div.panel-heading
+                                    strong Вложения
                                 //div.panel-body
                                 ul.list-group.panel-body
                                     if attachments
@@ -93,18 +98,27 @@ html
                         div.col-xs-2
                             div.well.well-sm
                                 div.row
-                                    div.col-xs-1 ИД:
+                                    div.col-xs-1
+                                        strong ИД:
                                     div.col-xs-2#id= jobInfo.JobID
                         div.col-xs-4
                             div.well.well-sm
                                 div.row
-                                    div.col-xs-5 Дата изменения:
+                                    div.col-xs-5
+                                        strong Дата изменения:
                                     div.col-xs-7#modify-date= jobInfo.ModifyDate
-                        div.col-xs-4
+                        div.col-xs-3
                             div.well.well-sm
                                 div.row
-                                    div.col-xs-5 Тип задания:
-                                    div.col-xs-7#job-kind= jobInfo.JobKindName
+                                    div.col-xs-6
+                                        strong Тип задания:
+                                    div.col-xs-6#job-kind= jobInfo.JobKindName
+                        div.col-xs-3
+                            div.well.well-sm
+                                div.row
+                                    div.col-xs-5
+                                        strong Статус:
+                                    div.col-xs-7#job-state= jobInfo.State
         //подключаем необходимые скрипты
         script(src="/js/jquery.min.js")
         script(src="/js/bootstrap.min.js")
