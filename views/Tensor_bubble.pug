@@ -1,0 +1,24 @@
+html
+    head
+        meta(charset="utf-8")
+        title= "Сортировка пузырьком"
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="/css/bootstrap.min.css" rel="stylesheet")
+        link(href="/css/main.css" rel="stylesheet")
+    body
+        div.container
+            h2 Сортировка пузырьком
+            div.row.col-xs-12
+                div.input-group
+                    input(name='inputDigits' placeholder='Введите цифры, разделенные запятыми, и нажмите ОК(другие символы будут удалены)').input-lg.form-control#main-input
+                    div.input-group-btn
+                        button.btn.btn-lg.btn-default.input-lg#ok-button OK
+
+            div(style = 'display:none').container#results
+                h3 Введенный массив чисел
+                div.row#show-input
+                h3 Отсортированный массив
+                div.row#show-output
+        script(src="/js/jquery.min.js")
+        script(src="/js/bootstrap.min.js")
+        script(src="/js/mainscript.js")

@@ -184,6 +184,11 @@ app.get(`${ATTACHMENT_PATH}:fileID`, (req, res) => {
     }
 });
 
+app.get('/tensor_bubble', (req, res) => {
+    res.render('tensor_bubble');
+});
+
+
 /**
  * вход на главную страницу
  */

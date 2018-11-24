@@ -17,3 +17,58 @@ textarea{
     overflow: auto;
     height: 400px;
 }
+
+.b-blue {
+    background-color: lightskyblue;
+    animation: animBlinkBlue 1500ms linear infinite;
+}
+.b-red {
+    background-color: lightpink;
+    animation: animBlinkRed 1500ms linear infinite;
+}
+@keyframes animBlinkBlue {
+    0% {
+      background-color: lightskyblue;
+    }
+    25% {
+      background-color: transparent;
+    }
+    50% {
+      background-color: lightskyblue;
+    }
+    75% {
+        background-color: transparent;
+    }
+    100% {
+        background-color: lightskyblue;
+    }
+  }
+@keyframes animBlinkRed {
+    0% {
+        background-color: lightpink;
+    }
+    25% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: lightpink;
+    }
+    75% {
+        background-color: transparent;
+    }
+    100% {
+        background-color: lightpink;
+    }
+}
+
+div.array-items{
+    overflow: hidden;
+    text-align: center;
+    padding: 5px;
+}
+
+div.array-inds{
+    overflow: hidden;
+    text-align: center;
+    padding: 5px;
+}

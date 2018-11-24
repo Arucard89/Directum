@@ -7,7 +7,7 @@ $('#searchJobForm').submit((e) => {
     if (searchText.length === 0) {
         alert('Введите цифры в поле ввода');
     }
-    if (!onlyNumbersInString(searchText)) {
+    if (!onlyDigitsInString(searchText)) {
         alert("ИД должно состоять только из цифр")
     } else {
         //ajax запрос
@@ -22,7 +22,7 @@ $('#searchJobForm').submit((e) => {
 /**
 * в строке должны быть только цифры
 */
-function onlyNumbersInString(s){
+function onlyDigitsInString(s){
     return s.replace(/\d/ig, '').length === 0;
 }
 
