@@ -156,6 +156,7 @@ class DirectumServices {
                 if (accessRights.UserCanRead(userObject)){
                     attForUser.push(att);
                 }
+                this.unlockObject(att);
                 this.unlockObject(doc);
             }
         }
@@ -170,10 +171,11 @@ class DirectumServices {
     getDocumentPropertiesByInfo(docInfo){
         let doc = this.directum.EDocuments.getObjectByID(docInfo.ID);
         let oneVersionDoc = this.getLastVersion(doc);
-        let fileExtension = oneVersionDoc.Editor.Extension;
+        let fileExtension = oneVersionDoc.Editor.Extension.toLowerCase();
         let sizeFile = oneVersionDoc.Size;
         let docName = docInfo.Name;
         this.unlockObject(doc);
+        this.unlockObject(docInfo);
         return {
             fileExtension,
             sizeFile,
@@ -229,11 +231,13 @@ class DirectumServices {
                 docLastVersion = this.getLastVersion(doc);
                 docLastVersion.Export(docPath);
                 this.unlockObject(docLastVersion);
+               this.unlockObject(doc);
             } else {
                 console.log(`У пользователя ${userName} нет прав на документ id=${id}`);
             }
         } catch (e) {
             console.log(e);
+            this.unlockObject(doc);
             this.unlockObject(docLastVersion);
         }
         return docPath;

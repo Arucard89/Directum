@@ -225,7 +225,12 @@ function sendFileToClient(filePath, res) {
         return false
     }
     try {
-        res.setHeader('Content-disposition', 'attachment; filename='+ path.basename(filePath));
+        if ((filePath.toLowerCase().indexOf('.pdf') < 0) &&
+            (filePath.toLowerCase().indexOf('.jpg') < 0) &&
+            (filePath.toLowerCase().indexOf('.jpeg') < 0) &&
+            (filePath.toLowerCase().indexOf('.png') < 0)) {
+            res.setHeader('Content-disposition', 'attachment; filename='+ path.basename(filePath));
+        }
         res.status(200);
         fs.createReadStream(filePath).pipe(res);
         return true;
